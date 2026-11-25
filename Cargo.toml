@@ -1,0 +1,15 @@
+[package]
+name = "wavelet"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+iced = { version = "0.14.0", default-features = false, features = [
+    "tiny-skia",
+    "wayland",
+    "thread-pool",
+    "crisp",
+    "svg",
+] }
+lucide-icons = { version = "1.79.0", features = ["iced"] }
+jiff = "1.0.3"
