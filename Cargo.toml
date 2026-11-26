@@ -1,9 +1,11 @@
-[package]
-name = "wavelet"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = ["apps/*", "shell/*"]
 
-[dependencies]
+[workspace.dependencies]
+wavelet_core = { path = "shell/wavelet_core" }
+wavelet_ui = { path = "shell/wavelet_ui" }
+
 iced = { version = "0.14.0", default-features = false, features = [
     "tiny-skia",
     "wayland",

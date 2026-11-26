@@ -1,0 +1,18 @@
+[package]
+name = "wavelet"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wavelet_jellyfin = { path = "../../apps/wavelet_jellyfin" }
+wavelet_navidrome = { path = "../../apps/wavelet_navidrome" }
+wavelet_radiobrowser = { path = "../../apps/wavelet_radiobrowser" }
+wavelet_youtube_music = { path = "../../apps/wavelet_youtube_music" }
+wavelet_settings = { path = "../../apps/wavelet_settings" }
+
+wavelet_core.workspace = true
+wavelet_ui.workspace = true
+
+iced.workspace = true
+lucide-icons.workspace = true
+jiff.workspace = true

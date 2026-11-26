@@ -1,12 +1,10 @@
-pub mod jellyfin;
-pub mod navidrome;
-
 use iced::{
     Alignment, Background, Border, Color, Element, Font,
     border::Radius,
     font,
     widget::{column, container, svg, text},
 };
+use wavelet_ui::fonts::INTER;
 
 pub trait App {
     fn icon(&self) -> svg::Handle;
@@ -31,7 +29,7 @@ pub fn card<'a, M: 'a>(app: &'a dyn App) -> Element<'a, M> {
             })
             .font(Font {
                 weight: font::Weight::Medium,
-                ..crate::INTER
+                ..INTER
             }),
     ]
     .spacing(37)

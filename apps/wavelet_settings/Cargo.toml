@@ -1,0 +1,9 @@
+[package]
+name = "wavelet_settings"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wavelet_core.workspace = true
+
+iced.workspace = true

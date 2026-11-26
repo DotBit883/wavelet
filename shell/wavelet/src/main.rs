@@ -1,20 +1,13 @@
-mod apps;
-mod core;
+mod home;
+mod screensaver;
 
-use iced::{Element, Event, Font, Size, Subscription, keyboard, mouse, window};
+use wavelet_ui::fonts::*;
+use iced::{Element, Event, Size, Subscription, Theme, color, keyboard, mouse, theme::Palette, window};
 use lucide_icons::LUCIDE_FONT_BYTES;
 
-// Fonts
-const INTER_LIGHT_BYTES: &[u8] = include_bytes!("../assets/fonts/inter_light.ttf");
-const INTER_NORMAL_BYTES: &[u8] = include_bytes!("../assets/fonts/inter_normal.ttf");
-const INTER_SEMIBOLD_BYTES: &[u8] = include_bytes!("../assets/fonts/inter_semibold.ttf");
-const INTER_SEMIBOLD_ITALIC_BYTES: &[u8] =
-    include_bytes!("../assets/fonts/inter_semibold_italic.ttf");
-const INTER: Font = Font::with_name("Inter 18pt");
-
 struct AppState {
-    screensaver: core::screensaver::Screensaver,
-    home: core::home::Home,
+    screensaver: screensaver::Screensaver,
+    home: home::Home,
     is_awake: bool,
 }
 
@@ -33,25 +26,26 @@ enum AppMessage {
     GlobalMouseMoved,
     GlobalMousePressed,
     GlobalKeyPressed,
+    Home(home::HomeMessage),
 }
 
 impl AppState {
     fn view(&self) -> Element<'_, AppMessage> {
         if self.is_awake {
-            self.home.view()
+            self.home.view().map(AppMessage::Home)
         } else {
             self.screensaver.view()
         }
     }
 
     fn update(&mut self, message: AppMessage) {
-        // wake-up stuff
-        self.is_awake = message == AppMessage::GlobalMouseMoved
-            || message == AppMessage::GlobalMousePressed
-            || message == AppMessage::GlobalKeyPressed;
+        // any input (including interacting with the home screen) wakes the app
+        self.is_awake = true;
 
-        if self.is_awake {
-            self.home.update(());
+        if let AppMessage::Home(message) = message {
+            self.home.update(message);
+        } else if self.is_awake {
+            self.home.tick();
         } else {
             self.screensaver.update(());
         }
@@ -67,11 +61,25 @@ impl AppState {
             _ => None,
         })
     }
+
+    fn theme(&self) -> Theme {
+        let palette = Palette {
+            background: color!(0xF5F7FB),
+            text: color!(0x232A48),
+            primary: color!(0x0680F7),
+            success: color!(0x12664f),
+            warning: color!(0xb77e33),
+            danger: color!(0xc3423f),
+        };
+
+        Theme::custom("Wavelet".to_string(), palette)
+    }
 }
 
 fn main() -> iced::Result {
     iced::application(AppState::default, AppState::update, AppState::view)
         .subscription(AppState::subscription)
+        .theme(AppState::theme)
         .window(window::Settings {
             size: Size::new(800.0, 480.0),
             resizable: false,
