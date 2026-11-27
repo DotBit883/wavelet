@@ -1,12 +1,12 @@
-use iced::{Color, color, widget::svg};
-use wavelet_core::app::{App, CardStyle};
+use slint::Image;
+use wavelet_core::app::{App, CardStyle, rgb, svg_icon};
 
 #[derive(Default)]
 pub struct SettingsApp;
 
 impl App for SettingsApp {
-    fn icon(&self) -> svg::Handle {
-        svg::Handle::from_memory(include_bytes!("../assets/icon.svg").as_slice())
+    fn icon(&self) -> Image {
+        svg_icon(include_bytes!("../assets/icon.svg"))
     }
 
     fn title(&self) -> String {
@@ -14,9 +14,6 @@ impl App for SettingsApp {
     }
 
     fn card_style(&self) -> CardStyle {
-        CardStyle {
-            background: Color::WHITE.into(),
-            foreground: color!(0x0680f7),
-        }
+        CardStyle::solid(rgb(0xFFFFFF), rgb(0x0680F7))
     }
 }

@@ -1,96 +1,70 @@
-mod home;
-mod screensaver;
+mod shell;
 
-use wavelet_ui::fonts::*;
-use iced::{Element, Event, Size, Subscription, Theme, color, keyboard, mouse, theme::Palette, window};
-use lucide_icons::LUCIDE_FONT_BYTES;
+use std::{cell::RefCell, rc::Rc, time::Duration};
 
-struct AppState {
-    screensaver: screensaver::Screensaver,
-    home: home::Home,
-    is_awake: bool,
-}
+use slint::{ComponentHandle, Timer, TimerMode};
+use wavelet_core::app::App;
 
-impl Default for AppState {
-    fn default() -> Self {
-        Self {
-            screensaver: Default::default(),
-            home: Default::default(),
-            is_awake: true,
-        }
-    }
-}
+use shell::Shell;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum AppMessage {
-    GlobalMouseMoved,
-    GlobalMousePressed,
-    GlobalKeyPressed,
-    Home(home::HomeMessage),
-}
+slint::include_modules!();
 
-impl AppState {
-    fn view(&self) -> Element<'_, AppMessage> {
-        if self.is_awake {
-            self.home.view().map(AppMessage::Home)
-        } else {
-            self.screensaver.view()
-        }
-    }
+fn main() -> Result<(), slint::PlatformError> {
+    let apps: Vec<Box<dyn App>> = vec![
+        // TODO (dot): Apple Music
+        // TODO (dot): Deezer
+        Box::new(wavelet_jellyfin::JellyfinApp),
+        Box::new(wavelet_navidrome::NavidromeApp),
+        Box::new(wavelet_radiobrowser::RadioBrowserApp),
+        // TODO (dot): Spotify
+        // TODO (dot): Tidal
+        Box::new(wavelet_youtube_music::YoutubeMusicApp),
+        Box::new(wavelet_settings::SettingsApp),
+    ];
 
-    fn update(&mut self, message: AppMessage) {
-        // any input (including interacting with the home screen) wakes the app
-        self.is_awake = true;
+    let ui = MainWindow::new()?;
+    let shell = Rc::new(RefCell::new(Shell::new(apps)));
 
-        if let AppMessage::Home(message) = message {
-            self.home.update(message);
-        } else if self.is_awake {
-            self.home.tick();
-        } else {
-            self.screensaver.update(());
-        }
+    // Wraps a callback: run `f` on the shell, then push the new state to the UI.
+    macro_rules! bind {
+        ($register:ident, |$shell:ident $(, $arg:ident)*| $body:expr) => {{
+            let ui_weak = ui.as_weak();
+            let shell = shell.clone();
+            ui.$register(move |$($arg),*| {
+                let Some(ui) = ui_weak.upgrade() else { return };
+                let mut $shell = shell.borrow_mut();
+                if $body {
+                    $shell.sync(&ui);
+                }
+            });
+        }};
     }
 
-    fn subscription(&self) -> Subscription<AppMessage> {
-        iced::event::listen_with(|event, _status, _window| match event {
-            Event::Mouse(mouse::Event::CursorMoved { .. }) => Some(AppMessage::GlobalMouseMoved),
-            Event::Mouse(mouse::Event::ButtonPressed(_)) => Some(AppMessage::GlobalMousePressed),
-            Event::Keyboard(keyboard::Event::KeyPressed { .. }) => {
-                Some(AppMessage::GlobalKeyPressed)
+    bind!(on_activity, |s| s.activity());
+    bind!(on_previous, |s| s.previous_page());
+    bind!(on_next, |s| s.next_page());
+    bind!(on_go_to, |s, page| s.go_to_page(page as usize));
+    bind!(on_open_app, |s, index| s.open_app(index as usize));
+    bind!(on_back, |s| s.back());
+
+    // Once per second: refresh the clock and check for idleness.
+    let timer = Timer::default();
+    {
+        let ui_weak = ui.as_weak();
+        let shell = shell.clone();
+        timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
+            let Some(ui) = ui_weak.upgrade() else { return };
+            Shell::sync_clock(&ui);
+
+            let mut shell = shell.borrow_mut();
+            if shell.tick() {
+                shell.sync(&ui);
             }
-            _ => None,
-        })
+        });
     }
 
-    fn theme(&self) -> Theme {
-        let palette = Palette {
-            background: color!(0xF5F7FB),
-            text: color!(0x232A48),
-            primary: color!(0x0680F7),
-            success: color!(0x12664f),
-            warning: color!(0xb77e33),
-            danger: color!(0xc3423f),
-        };
+    Shell::sync_clock(&ui);
+    shell.borrow().sync(&ui);
 
-        Theme::custom("Wavelet".to_string(), palette)
-    }
-}
-
-fn main() -> iced::Result {
-    iced::application(AppState::default, AppState::update, AppState::view)
-        .subscription(AppState::subscription)
-        .theme(AppState::theme)
-        .window(window::Settings {
-            size: Size::new(800.0, 480.0),
-            resizable: false,
-            ..Default::default()
-        })
-        .title("wavelet")
-        .font(INTER_LIGHT_BYTES)
-        .font(INTER_NORMAL_BYTES)
-        .font(INTER_SEMIBOLD_BYTES)
-        .font(INTER_SEMIBOLD_ITALIC_BYTES)
-        .font(LUCIDE_FONT_BYTES)
-        .default_font(INTER)
-        .run()
+    ui.run()
 }

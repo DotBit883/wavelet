@@ -1,0 +1,23 @@
+// Fonts must be imported by a file that the application imports, or Slint
+// never registers them.
+import "../assets/fonts/inter_light.ttf";
+import "../assets/fonts/inter_normal.ttf";
+import "../assets/fonts/inter_semibold.ttf";
+import "../assets/fonts/inter_semibold_italic.ttf";
+import "../assets/fonts/lucide.ttf";
+
+export global Theme {
+    // Palette
+    out property <color> background: #F5F7FB;
+    out property <color> text: #232A48;
+    out property <color> primary: #0680F7;
+    out property <color> primary-strong: #0680F7.darker(0.2);
+
+    // Inactive page dots (idle / hovered)
+    out property <color> dot: #232A48.with-alpha(0.2);
+    out property <color> dot-strong: #232A48.with-alpha(0.35);
+
+    // Font families (the static Inter files report "Inter 18pt")
+    out property <string> font: "Inter 18pt";
+    out property <string> icon-font: "lucide";
+}

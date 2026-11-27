@@ -1,0 +1,27 @@
+import { Theme } from "@wavelet/theme.slint";
+import { Clock } from "types.slint";
+
+export component ScreensaverScreen inherits Rectangle {
+    VerticalLayout {
+        alignment: center;
+        spacing: 20px;
+
+        Text {
+            text: Clock.long-date;
+            color: Theme.text;
+            font-family: Theme.font;
+            font-size: 40px;
+            font-weight: 600;
+            horizontal-alignment: center;
+        }
+
+        Text {
+            text: Clock.time;
+            color: Theme.text;
+            font-family: Theme.font;
+            font-size: 220px;
+            font-weight: 600;
+            horizontal-alignment: center;
+        }
+    }
+}

@@ -1,0 +1,81 @@
+import { Theme } from "@wavelet/theme.slint";
+import { TextButton } from "@wavelet/widgets.slint";
+import { AppEntry, Clock } from "types.slint";
+import { HomeScreen } from "home.slint";
+import { ScreensaverScreen } from "screensaver.slint";
+
+export { AppEntry, Clock }
+
+export enum Screen { screensaver, home, app }
+
+export component MainWindow inherits Window {
+    title: "wavelet";
+    width: 800px;
+    height: 480px;
+    background: Theme.background;
+    default-font-family: Theme.font;
+
+    in property <Screen> screen: Screen.home;
+    in property <[AppEntry]> page-apps;
+    in property <int> page;
+    in property <int> page-count;
+    in property <string> open-app-title;
+
+    // Any pointer or key input. Rust uses it to wake and to reset the idle timer.
+    callback activity();
+    callback previous();
+    callback next();
+    callback go-to(int);
+    callback open-app(int);
+    callback back();
+
+    // Catch-all input layer; widgets on top handle their own events.
+    TouchArea {
+        pointer-event(event) => { root.activity(); }
+    }
+
+    focus := FocusScope {
+        key-pressed(event) => {
+            root.activity();
+            reject
+        }
+    }
+
+    if root.screen == Screen.screensaver: ScreensaverScreen { }
+
+    if root.screen == Screen.home: HomeScreen {
+        page-apps: root.page-apps;
+        page: root.page;
+        page-count: root.page-count;
+        previous => { root.activity(); root.previous(); }
+        next => { root.activity(); root.next(); }
+        go-to(page) => { root.activity(); root.go-to(page); }
+        open-app(index) => { root.activity(); root.open-app(index); }
+    }
+
+    // Placeholder until apps provide their own screens.
+    if root.screen == Screen.app: VerticalLayout {
+        alignment: center;
+        spacing: 24px;
+
+        Text {
+            text: root.open-app-title;
+            color: Theme.text;
+            font-family: Theme.font;
+            font-size: 40px;
+            font-weight: 600;
+            horizontal-alignment: center;
+        }
+
+        HorizontalLayout {
+            alignment: center;
+            TextButton {
+                text: "Back";
+                width: 160px;
+                clicked => { root.activity(); root.back(); }
+            }
+        }
+    }
+
+    init => { focus.focus(); }
+}

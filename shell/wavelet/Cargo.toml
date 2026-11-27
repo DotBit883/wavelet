@@ -11,8 +11,9 @@ wavelet_youtube_music = { path = "../../apps/wavelet_youtube_music" }
 wavelet_settings = { path = "../../apps/wavelet_settings" }
 
 wavelet_core.workspace = true
-wavelet_ui.workspace = true
 
-iced.workspace = true
-lucide-icons.workspace = true
+slint.workspace = true
 jiff.workspace = true
+
+[build-dependencies]
+wavelet_ui.workspace = true

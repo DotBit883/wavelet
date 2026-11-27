@@ -1,0 +1,125 @@
+import { Theme } from "@wavelet/theme.slint";
+import { AppCard, PageArrow, PageDot } from "@wavelet/widgets.slint";
+import { AppEntry, Clock } from "types.slint";
+
+component StatusBar inherits Rectangle {
+    height: 32px;
+
+    // date
+    Text {
+        text: Clock.short-date;
+        color: Theme.text;
+        font-family: Theme.font;
+        font-size: 20px;
+        font-weight: 300;
+        x: 76px;
+        height: 24px;
+        y: parent.height - self.height + 5px;
+    }
+
+    // time
+    Text {
+        text: Clock.time;
+        color: Theme.text;
+        font-family: Theme.font;
+        font-size: 43px;
+        font-weight: 400;
+        width: 200px;
+        x: (parent.width - self.width) / 2;
+        horizontal-alignment: center;
+        height: 52px;
+        y: parent.height - self.height + 10px;
+    }
+
+    // TODO (dot): quick settings
+    Text {
+        text: "\u{e145}  \u{e1ab}  \u{e620}";
+        color: Theme.text;
+        font-family: Theme.icon-font;
+        font-size: 23px;
+        width: 120px;
+        x: parent.width - 73px - self.width;
+        horizontal-alignment: right;
+        height: 23px;
+        y: parent.height - self.height;
+    }
+}
+
+export component HomeScreen inherits Rectangle {
+    in property <[AppEntry]> page-apps;
+    in property <int> page;
+    in property <int> page-count;
+    callback previous();
+    callback next();
+    callback go-to(int);
+    callback open-app(int);
+
+    VerticalLayout {
+        padding-top: 40px;
+        padding-bottom: 15px;
+
+        StatusBar { height: 32px; }
+
+        Rectangle { height: 59px; } // spacer
+
+        // Cards, vertically centred in the remaining space.
+        HorizontalLayout {
+            height: 207px;
+            padding-left: 14px;
+            padding-right: 13px;
+            spacing: 16px;
+
+            // previous page button
+            VerticalLayout {
+                alignment: center;
+                PageArrow {
+                    shown: root.page > 0;
+                    clicked => { root.previous(); }
+                }
+            }
+
+            // app cards
+            HorizontalLayout {
+                horizontal-stretch: 1;
+                alignment: start;
+                spacing: 9px;
+
+                for app in root.page-apps: AppCard {
+                    title: app.title;
+                    icon: app.icon;
+                    gradient-angle: app.gradient-angle;
+                    start: app.start;
+                    end: app.end;
+                    end-position: app.end-position;
+                    foreground: app.foreground;
+                    clicked => { root.open-app(app.index); }
+                }
+            }
+
+            // next page button
+            VerticalLayout {
+                alignment: center;
+                PageArrow {
+                    right-aligned: true;
+                    shown: root.page + 1 < root.page-count;
+                    clicked => { root.next(); }
+                }
+            }
+        }
+
+        Rectangle { height: 23px; } // spacer
+
+        // jump to page dot indicators
+        HorizontalLayout {
+            alignment: center;
+            height: 16px;
+
+            for i in root.page-count: PageDot {
+                active: i == root.page;
+                clicked => { root.go-to(i); }
+            }
+        }
+
+        Rectangle { height: 24px; } // spacer
+    }
+}

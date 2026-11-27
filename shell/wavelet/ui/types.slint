@@ -1,0 +1,19 @@
+/// One app as shown on the home screen. Built from `wavelet_core::app::App`.
+export struct AppEntry {
+    /// Index in the full app list (not within the page).
+    index: int,
+    title: string,
+    icon: image,
+    gradient-angle: angle,
+    start: color,
+    end: color,
+    end-position: float,
+    foreground: color,
+}
+
+/// Formatted clock strings, pushed from Rust once per second.
+export global Clock {
+    in property <string> short-date;
+    in property <string> long-date;
+    in property <string> time;
+}

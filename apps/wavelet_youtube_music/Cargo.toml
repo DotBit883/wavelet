@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 wavelet_core.workspace = true
 
-iced.workspace = true
+slint.workspace = true

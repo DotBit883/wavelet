@@ -1,14 +1,12 @@
-use wavelet_core::app::{App, CardStyle};
-use iced::{Color, color, gradient::Linear, widget::svg};
+use slint::Image;
+use wavelet_core::app::{App, CardStyle, rgb, svg_icon};
 
 #[derive(Default)]
 pub struct NavidromeApp;
 
 impl App for NavidromeApp {
-    fn icon(&self) -> svg::Handle {
-        svg::Handle::from_memory(
-            include_bytes!("../assets/icon.svg").as_slice(),
-        )
+    fn icon(&self) -> Image {
+        svg_icon(include_bytes!("../assets/icon.svg"))
     }
 
     fn title(&self) -> String {
@@ -16,13 +14,6 @@ impl App for NavidromeApp {
     }
 
     fn card_style(&self) -> CardStyle {
-        let linear = Linear::new(150.0_f32.to_radians())
-            .add_stop(0.0, color!(0x3DA9FC))
-            .add_stop(1.0, color!(0x0B5FD1));
-
-        CardStyle {
-            background: linear.into(),
-            foreground: Color::WHITE,
-        }
+        CardStyle::gradient(150.0, rgb(0x3DA9FC), rgb(0x0B5FD1), rgb(0xFFFFFF))
     }
 }

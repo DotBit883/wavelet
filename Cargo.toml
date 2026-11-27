@@ -6,12 +6,12 @@ members = ["apps/*", "shell/*"]
 wavelet_core = { path = "shell/wavelet_core" }
 wavelet_ui = { path = "shell/wavelet_ui" }
 
-iced = { version = "0.14.0", default-features = false, features = [
-    "tiny-skia",
-    "wayland",
-    "thread-pool",
-    "crisp",
-    "svg",
+slint = { version = "1.19.1", default-features = false, features = [
+    "std",
+    "compat-1-2",
+    "backend-winit",
+    "backend-winit-wayland",
+    "renderer-software",
 ] }
-lucide-icons = { version = "1.79.0", features = ["iced"] }
+slint-build = "1.19.1"
 jiff = "1.0.3"

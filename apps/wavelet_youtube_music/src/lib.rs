@@ -1,14 +1,12 @@
-use wavelet_core::app::{App, CardStyle};
-use iced::{Color, color, widget::svg};
+use slint::Image;
+use wavelet_core::app::{App, CardStyle, rgb, svg_icon};
 
 #[derive(Default)]
 pub struct YoutubeMusicApp;
 
 impl App for YoutubeMusicApp {
-    fn icon(&self) -> svg::Handle {
-        svg::Handle::from_memory(
-            include_bytes!("../assets/icon.svg").as_slice(),
-        )
+    fn icon(&self) -> Image {
+        svg_icon(include_bytes!("../assets/icon.svg"))
     }
 
     fn title(&self) -> String {
@@ -16,9 +14,6 @@ impl App for YoutubeMusicApp {
     }
 
     fn card_style(&self) -> CardStyle {
-        CardStyle {
-            background: color!(0xFF0033).into(),
-            foreground: Color::WHITE,
-        }
+        CardStyle::solid(rgb(0xFF0033), rgb(0xFFFFFF))
     }
 }

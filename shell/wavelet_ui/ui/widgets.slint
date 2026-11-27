@@ -1,0 +1,126 @@
+import { Theme } from "theme.slint";
+
+/// Round page indicator. The visible dot is small, the touch area is larger.
+export component PageDot inherits Rectangle {
+    in property <bool> active;
+    callback clicked();
+
+    width: (root.active ? 16px : 10px) + 10px;
+    height: 16px;
+
+    Rectangle {
+        width: root.active ? 16px : 10px;
+        height: self.width;
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        border-radius: self.width / 2;
+        background: root.active
+            ? (touch.has-hover ? Theme.primary-strong : Theme.primary)
+            : (touch.has-hover ? Theme.dot-strong : Theme.dot);
+    }
+
+    touch := TouchArea {
+        x: 0px;  y: -6px;
+        width: parent.width;
+        height: parent.height + 12px;
+        clicked => { root.clicked(); }
+    }
+}
+
+/// Previous/next page arrow. When `shown` is false it is invisible but still
+/// takes up its space, so the cards don't shift between pages.
+export component PageArrow inherits Rectangle {
+    in property <bool> shown: true;
+    in property <bool> right-aligned: false;
+    callback clicked();
+
+    width: 41px;
+    height: 78px;
+    visible: root.shown;
+
+    Image {
+        source: root.right-aligned
+            ? @image-url("../assets/icons/next_page.svg")
+            : @image-url("../assets/icons/prev_page.svg");
+        width: 100%;
+        height: 100%;
+        colorize: touch.has-hover ? Theme.primary-strong : Theme.primary;
+    }
+
+    touch := TouchArea {
+        enabled: root.shown;
+        clicked => { root.clicked(); }
+    }
+}
+
+/// An app tile on the home screen.
+export component AppCard inherits Rectangle {
+    in property <string> title;
+    in property <image> icon;
+    in property <angle> gradient-angle;
+    in property <color> start;
+    in property <color> end;
+    in property <float> end-position: 1;
+    in property <color> foreground;
+    callback clicked();
+
+    width: 158px;
+    height: 207px;
+    border-radius: 10px;
+    clip: true;
+    background: @linear-gradient(root.gradient-angle, root.start 0%, root.end root.end-position * 100%);
+
+    VerticalLayout {
+        alignment: center;
+        spacing: 37px;
+
+        Image {
+            source: root.icon;
+            colorize: root.foreground;
+            image-fit: contain;
+            height: 64px;
+        }
+
+        Text {
+            text: root.title;
+            color: root.foreground;
+            font-family: Theme.font;
+            font-size: 18px;
+            font-weight: 500;
+            horizontal-alignment: center;
+        }
+    }
+
+    // Press/hover feedback: darken the card.
+    Rectangle {
+        background: touch.pressed ? #00000029 : (touch.has-hover ? #00000014 : transparent);
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+}
+
+/// Plain text button.
+export component TextButton inherits Rectangle {
+    in property <string> text;
+    callback clicked();
+
+    height: 48px;
+    border-radius: 24px;
+    background: touch.pressed ? Theme.primary-strong : Theme.primary;
+
+    Text {
+        text: root.text;
+        color: white;
+        font-family: Theme.font;
+        font-size: 18px;
+        font-weight: 600;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+}
